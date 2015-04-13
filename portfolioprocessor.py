@@ -32,13 +32,15 @@ def getthefile(default_filename):
 # the pad is the character distance from the xml_before tag to the text you want
 # same for the xml_end
 
-def get_item_list(item_string,item_xml_name,xml_before,pad_before,xml_after,pad_after):
+def get_item_list(item_string,item_xml_name,item_xml_elem,xml_before,pad_before,xml_after,pad_after):
 	item_startpos = item_string.find('<' + item_xml_name + 'Collection>')
 	item_endpos = item_string.find('</' + item_xml_name + 'Collection>')
 	item_string = item_string[item_startpos:item_endpos]
 	listindex = 0
 	item_list = []
-	while item_string.find(xml_before) != -1:
+	while item_string.find(item_xml_elem) != -1:
+		thisitem_start = item_string.find(item_xml_elem) + len(item_xml_elem)
+		item_string = item_string[thisitem_start:]
 		thisitem_start = item_string.find(xml_before) + pad_before
 		thisitem_end = item_string.find(xml_after) - pad_after
 		item_list.append(listindex)
@@ -69,10 +71,10 @@ def getthemelist(themestring):
 
 
 filestring = getthefile('export.xml')
-theme_list = get_item_list(filestring,'theme','<title>',16,'</title>',3)
-stream_list = get_item_list(filestring,'stream','<title>',16,'</title>',3)
-
-
+theme_list = get_item_list(filestring,'theme','<theme ','<title>',16,'</title>',3)
+stream_list = get_item_list(filestring,'stream','<stream ','<title>',16,'</title>',3)
+team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
+initiatives_list = get_item_list(filestring,'workItem','plan-initiatives-1','<title>',16,'</title>',3)
 
 
 
