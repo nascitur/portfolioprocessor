@@ -1,3 +1,5 @@
+#!/usr/bin/python
+#
 # portfolioprocessor.py 
 #
 # Goal of this is to process the XML output file exported from the
@@ -7,6 +9,8 @@
 
 import mmap
 import os
+import csv
+import datetime
 
 # getthefile()
 # takes a default filename as the input and requests user input
@@ -21,9 +25,10 @@ def getthefile(default_filename):
 	print "opening " + desktoppath + default_filename + "..."
 	openfile = open(desktoppath + default_filename)
 	stringified = mmap.mmap(openfile.fileno(), 0, access=mmap.ACCESS_READ)
+	openfile.close()
 	return stringified
 
-# Pick out the section of the file to work on
+# Pick out the section of the file to work on during each processing chunk
 # this prevents any term collisions during processing
 
 def trim_to_section(item_string,item_xml_name):
@@ -95,14 +100,19 @@ def get_item_list_2D(
 # Process file
 
 def generate_csv(
-	filestring,
+	item_string,
 	theme_list,
 	stream_list,
 	team_list,
 	initiatives_list,
 	releases_list):
 	item_string = trim_to_section(item_string,'workItem')
-	return
+	csvfile = open('portfolio'+os.path.expanduser('~/Desktop/')+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv', 'w')
+	csvfile.write('Test!')
+	output_file = csv.writer(csvfile)
+	output_file.writerow('Priotity','Description','Theme','Initiative','Stream','Release')
+
+#TODO		while item_string.find('</workItemCollection>') != -1:
 
 # Get all our lists
 
@@ -113,6 +123,7 @@ def main():
 	team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
 	initiatives_list = get_item_list(filestring,'workItem','plan-initiatives-1','<title>',16,'</title>',3)
 	releases_list = get_item_list_2D(filestring,'release','<release ','<title>',16,'</title>',3,'aostream')
+	generate_csv(filestring,theme_list,stream_list,team_list,initiatives_list,releases_list)
 
 if __name__ == "__main__": main()
 
