@@ -23,6 +23,14 @@ def getthefile(default_filename):
 	stringified = mmap.mmap(openfile.fileno(), 0, access=mmap.ACCESS_READ)
 	return stringified
 
+# Pick out the section of the file to work on
+# this prevents any term collisions during processing
+
+def trim_to_section(item_string,item_xml_name):
+	item_startpos = item_string.find('<' + item_xml_name + 'Collection>')
+	item_endpos = item_string.find('</' + item_xml_name + 'Collection>')
+	return item_string[item_startpos:item_endpos]
+
 # get_item_list returns list of items from the xml
 # by "items" I mean initiatives, releases, teams, etc
 #
@@ -40,9 +48,7 @@ def get_item_list(
 	pad_before,
 	xml_after,
 	pad_after):
-	item_startpos = item_string.find('<' + item_xml_name + 'Collection>')
-	item_endpos = item_string.find('</' + item_xml_name + 'Collection>')
-	item_string = item_string[item_startpos:item_endpos]
+	item_string = trim_to_section(item_string,item_xml_name)
 	item_list = []
 	i = 0
 	while item_string.find(item_xml_elem) != -1:
@@ -65,9 +71,7 @@ def get_item_list_2D(
 	xml_after,
 	pad_after,
 	xml_2D_elem):
-	list_startpos = item_string.find('<' + item_xml_name + 'Collection>')
-	list_endpos = item_string.find('</' + item_xml_name + 'Collection>')
-	item_string = item_string[list_startpos:list_endpos]
+	item_string = trim_to_section(item_string,item_xml_name)
 	item_list = []
 	item_list.append([])
 	item_list.append([])
@@ -82,24 +86,34 @@ def get_item_list_2D(
 		if last_i != i: j = 0
 		item_start = item_string.find(xml_before) + pad_before
 		item_end = item_string.find(xml_after) - pad_after
-		print i
-		print j
 		item_list[i].append(j)
 		item_list[i][j] = item_string[item_start:item_end]
 		print item_list[i][j]
 		item_string = item_string[item_end + len(item_xml_name):]
 		j = j + 1
 
+# Process file
+
+def generate_csv(
+	filestring,
+	theme_list,
+	stream_list,
+	team_list,
+	initiatives_list,
+	releases_list):
+	item_string = trim_to_section(item_string,'workItem')
+	return
 
 # Get all our lists
 
-filestring = getthefile('export.xml')
-theme_list = get_item_list(filestring,'theme','<theme ','<title>',16,'</title>',3)
-stream_list = get_item_list(filestring,'stream','<stream ','<title>',16,'</title>',3)
-team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
-initiatives_list = get_item_list(filestring,'workItem','plan-initiatives-1','<title>',16,'</title>',3)
-releases_list = get_item_list_2D(filestring,'release','<release ','<title>',16,'</title>',3,'aostream')
+def main():
+	filestring = getthefile('export.xml')
+	theme_list = get_item_list(filestring,'theme','<theme ','<title>',16,'</title>',3)
+	stream_list = get_item_list(filestring,'stream','<stream ','<title>',16,'</title>',3)
+	team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
+	initiatives_list = get_item_list(filestring,'workItem','plan-initiatives-1','<title>',16,'</title>',3)
+	releases_list = get_item_list_2D(filestring,'release','<release ','<title>',16,'</title>',3,'aostream')
 
-
+if __name__ == "__main__": main()
 
 
