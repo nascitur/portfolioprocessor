@@ -4,6 +4,7 @@
 #
 # Goal of this is to process the XML output file exported from the
 # Jira portfolio planner
+# 
 
 # Import necessary modules
 
@@ -18,6 +19,7 @@ import datetime
 # returns an mmap string of the file
 
 def getthefile(default_filename):
+	print 'Inside user ~/Desktop/'
 	desktoppath = os.path.expanduser('~/Desktop/')
 	user_filename = raw_input("Enter name of file (" + default_filename + "): ")
 	if user_filename != '':
@@ -107,10 +109,13 @@ def generate_csv(
 	initiatives_list,
 	releases_list):
 	item_string = trim_to_section(item_string,'workItem')
-	csvfile = open('portfolio'+os.path.expanduser('~/Desktop/')+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv', 'w')
-	csvfile.write('Test!')
+	file_name = 'portfolio'+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv'
+	path_name = os.path.expanduser('~/Desktop/') + 'output/'
+	print path_name + file_name
+	print os.path.join(path_name,file_name)
+	csvfile = open(os.path.join(path_name,file_name),'a+')
 	output_file = csv.writer(csvfile)
-	output_file.writerow('Priotity','Description','Theme','Initiative','Stream','Release')
+	output_file.writerow(['Priority','Description','Theme','Initiative','Stream','Release'])
 
 #TODO		while item_string.find('</workItemCollection>') != -1:
 
@@ -118,6 +123,8 @@ def generate_csv(
 
 def main():
 	filestring = getthefile('export.xml')
+	print 'You should create a folder on the desktop named "output"'
+	print 'And give it permissions "chmod -R 755 output"'
 	theme_list = get_item_list(filestring,'theme','<theme ','<title>',16,'</title>',3)
 	stream_list = get_item_list(filestring,'stream','<stream ','<title>',16,'</title>',3)
 	team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
@@ -127,4 +134,9 @@ def main():
 
 if __name__ == "__main__": main()
 
-
+# Note if you want to make this executable with just the file name:
+# make the file executable:
+# chmod +x portfolioprocessor.py
+# and put it in a directory on your PATH (can be a symlink):
+# export PATH=/my/directory/with/pythonscript:$PATH
+# For permanence add that at the bottom of your .bashrc or .bash_profile
