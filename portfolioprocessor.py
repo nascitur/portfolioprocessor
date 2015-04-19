@@ -12,6 +12,7 @@ import mmap
 import os
 import csv
 import datetime
+import xml.etree.ElementTree as ET
 
 # getthefile()
 # takes a default filename as the input and requests user input
@@ -28,7 +29,39 @@ def getthefile(default_filename):
 	openfile = open(desktoppath + default_filename)
 	stringified = mmap.mmap(openfile.fileno(), 0, access=mmap.ACCESS_READ)
 	openfile.close()
+	xml_file = ET.parse(desktoppath + default_filename)
+	parsed_xml_file = xml_file.getroot()
+#	for child in parsed_xml_file:
+#		print child.tag, child.attrib
+#	for work_item in parsed_xml_file.iter('workItem'):
+#		print work_item.tag, work_item.attrib
+
+# TODO: The below isn't working
+	for work_item in parsed_xml_file.iter('workItem'):
+		print "WHAT The fuCK"
+		entry_num = work_item.attrib.get('type')
+		entry_pri = work_item.attrib.get('aoparent')
+		entry_subj = work_item.find('title').text
+		print entry_num, entry_pri, entry_subj
+		if entry_num and entry_pri and entry_subj:
+			if entry_num == "0":
+				print "Epic, pri " + entry_pri + ":" + entry_subj
+			elif entry_num == "1":
+				print "Story, pri " + entry_pri + ":" + entry_subj		
 	return stringified
+	print "TEAM LIST NEXT"
+#TODO: Try to get item lists from parser instead:
+	item_list = []
+	i = 0
+	for go_team in parsed_xml_file.iter('teamCollection'):
+		print "go team"
+		item_list.append(i)
+		item_list[i] = go_team.find('title').text
+		print item_list[i]
+		i = i + 1
+
+# Note: type = 0 means portfolio epic, type=1 means portfolio story, 
+# type = 2 means initiative
 
 # Pick out the section of the file to work on during each processing chunk
 # this prevents any term collisions during processing
@@ -109,15 +142,13 @@ def generate_csv(
 	initiatives_list,
 	releases_list):
 	item_string = trim_to_section(item_string,'workItem')
-	file_name = 'portfolio'+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv'
+	file_name = 'portfolio-'+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv'
 	path_name = os.path.expanduser('~/Desktop/') + 'output/'
-	print path_name + file_name
-	print os.path.join(path_name,file_name)
+	print 'Output to ' + path_name + file_name
 	csvfile = open(os.path.join(path_name,file_name),'a+')
 	output_file = csv.writer(csvfile)
 	output_file.writerow(['Priority','Description','Theme','Initiative','Stream','Release'])
-
-#TODO		while item_string.find('</workItemCollection>') != -1:
+#	while item_string.find('</workItemCollection>') != -1:
 
 # Get all our lists
 
