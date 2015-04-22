@@ -40,15 +40,26 @@ def parsefileasxml(openfile,tagname):
 	parsed_xml_file = xml_file.getroot()
 	top_level_list = []
 	top_level_list.append([])
-	top_level_list.append([])
+	priorityref = []
+	i = 0
 	for work_item in parsed_xml_file.iter(tagname):
 		entry_type = work_item.attrib.get('type')
 		entry_id = work_item.attrib.get('id')
+		entry_parent = work_item.attrib.get('aoparent')
 		entry_subj = work_item.find('title').text
-		print entry_type, entry_id, entry_subj
-#		if entry_type and entry_pri and entry_subj:
-#			if entry_type == "1":
-#				top_level_list[]	
+		print entry_type, entry_id, entry_parent, entry_subj 
+		if entry_type and entry_id and entry_subj:
+			if entry_type == "0":
+				top_level_list[i] = [entry_id,entry_subj,[]]
+				top_level_list.append([])
+				priorityref.append(entry_id)
+				print top_level_list[i], i, priorityref[i]  #debug
+				i = i + 1
+			elif entry_type == "1":
+				print priorityref.index(entry_parent) 		#debug
+				top_level_list[priorityref.index(entry_parent)][2].append(entry_subj)
+				print top_level_list[priorityref.index(entry_parent)] #debug
+				i = i + 1
 	print "Heres the top level list", top_level_list
 
 # Pick out the section of the file to work on during each processing chunk
