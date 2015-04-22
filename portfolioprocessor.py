@@ -53,14 +53,14 @@ def parsefileasxml(openfile,tagname):
 				top_level_list[i] = [entry_id,entry_subj,[]]
 				top_level_list.append([])
 				priorityref.append(entry_id)
-				print top_level_list[i], i, priorityref[i]  #debug
+#debug				print top_level_list[i], i, priorityref[i]  
 				i = i + 1
 			elif entry_type == "1":
-				print priorityref.index(entry_parent) 		#debug
+#debug				print priorityref.index(entry_parent) 		
 				top_level_list[priorityref.index(entry_parent)][2].append(entry_subj)
-				print top_level_list[priorityref.index(entry_parent)] #debug
+#debug				print top_level_list[priorityref.index(entry_parent)] 
 				i = i + 1
-	print "Heres the top level list", top_level_list
+	return top_level_list
 
 # Pick out the section of the file to work on during each processing chunk
 # this prevents any term collisions during processing
@@ -135,22 +135,27 @@ def get_item_list_2D(
 # Process file
 
 def generate_csv(
-	item_string,
+	subject_list,
 	theme_list,
 	stream_list,
 	team_list,
 	initiatives_list,
 	releases_list):
-	item_string = trim_to_section(item_string,'workItem')
 	file_name = 'portfolio-'+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv'
 	path_name = os.path.expanduser('~/Desktop/') + 'output/'
 	print 'Output to ' + path_name + file_name
 	csvfile = open(os.path.join(path_name,file_name),'a+')
 	output_file = csv.writer(csvfile)
-	output_file.writerow(['Priority','Description','Theme','Initiative','Stream','Release'])
-#	while item_string.find('</workItemCollection>') != -1:
+	output_file.writerow(['Priority','Portfolio Epic','Team Epic','Theme','Initiative','Stream','Release'])
+	i=0
+	for lineitem in subject_list:
+		i=i+1
+		print i, lineitem
+		for subline in lineitem[2]:
+			print subline
+			output_file.writerow([i,lineitem[1],subline])
 
-# Get all our lists
+# Get all our lists, consolidate them, and output them to the csv file
 
 def main():
 	openfile = getthefile('export.xml')
@@ -162,8 +167,8 @@ def main():
 	team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
 	initiatives_list = get_item_list(filestring,'workItem','plan-initiatives-1','<title>',16,'</title>',3)
 	releases_list = get_item_list_2D(filestring,'release','<release ','<title>',16,'</title>',3,'aostream')
-	parsefileasxml(openfile,'workItem')
-	generate_csv(filestring,theme_list,stream_list,team_list,initiatives_list,releases_list)
+	subject_list = parsefileasxml(openfile,'workItem')
+	generate_csv(subject_list,theme_list,stream_list,team_list,initiatives_list,releases_list)
 
 if __name__ == "__main__": main()
 
