@@ -132,7 +132,7 @@ def get_item_list_2D(
 		j = j + 1
 	print "Heres the 2D list", item_list
 
-# Process file
+# Write out to CSV file
 
 def generate_csv(
 	subject_list,
@@ -151,9 +151,12 @@ def generate_csv(
 	for lineitem in subject_list:
 		i=i+1
 		print i, lineitem
-		for subline in lineitem[2]:
-			print subline
-			output_file.writerow([i,lineitem[1],subline])
+		if lineitem != []:
+			if lineitem[2] == []:
+				output_file.writerow([i,lineitem[1]])
+			for subline in lineitem[2]:
+				print subline
+				output_file.writerow([i,lineitem[1],subline])
 
 # Get all our lists, consolidate them, and output them to the csv file
 
