@@ -27,33 +27,35 @@ def getthefile(default_filename):
 		default_filename = user_filename
 	print "opening " + desktoppath + default_filename + "..."
 	openfile = open(desktoppath + default_filename)
+	return openfile
+
+def returnfileasstring(openfile):
 	stringified = mmap.mmap(openfile.fileno(), 0, access=mmap.ACCESS_READ)
-	openfile.close()
-	xml_file = ET.parse(desktoppath + default_filename)
+	return stringified
+
+def parsefileasxml(openfile):
+	xml_file = ET.parse(openfile)
 	parsed_xml_file = xml_file.getroot()
 #	for child in parsed_xml_file:
 #		print child.tag, child.attrib
 #	for work_item in parsed_xml_file.iter('workItem'):
 #		print work_item.tag, work_item.attrib
-
 # TODO: The below isn't working
 	for work_item in parsed_xml_file.iter('workItem'):
-		print "WHAT The fuCK"
-		entry_num = work_item.attrib.get('type')
-		entry_pri = work_item.attrib.get('aoparent')
+		entry_type = work_item.attrib.get('type')
+		entry_pri = work_item.attrib.get('id')
 		entry_subj = work_item.find('title').text
-		print entry_num, entry_pri, entry_subj
-		if entry_num and entry_pri and entry_subj:
-			if entry_num == "0":
+		print entry_type, entry_pri, entry_subj
+		if entry_type and entry_pri and entry_subj:
+			if entry_type == "0":
 				print "Epic, pri " + entry_pri + ":" + entry_subj
-			elif entry_num == "1":
+			elif entry_type == "1":
 				print "Story, pri " + entry_pri + ":" + entry_subj		
-	return stringified
 	print "TEAM LIST NEXT"
 #TODO: Try to get item lists from parser instead:
 	item_list = []
 	i = 0
-	for go_team in parsed_xml_file.iter('teamCollection'):
+	for go_team in parsed_xml_file.iter('team'):
 		print "go team"
 		item_list.append(i)
 		item_list[i] = go_team.find('title').text
@@ -153,14 +155,16 @@ def generate_csv(
 # Get all our lists
 
 def main():
-	filestring = getthefile('export.xml')
+	openfile = getthefile('export.xml')
 	print 'You should create a folder on the desktop named "output"'
 	print 'And give it permissions "chmod -R 755 output"'
+	filestring = returnfileasstring(openfile)
 	theme_list = get_item_list(filestring,'theme','<theme ','<title>',16,'</title>',3)
 	stream_list = get_item_list(filestring,'stream','<stream ','<title>',16,'</title>',3)
 	team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
 	initiatives_list = get_item_list(filestring,'workItem','plan-initiatives-1','<title>',16,'</title>',3)
 	releases_list = get_item_list_2D(filestring,'release','<release ','<title>',16,'</title>',3,'aostream')
+	parsefileasxml(openfile)
 	generate_csv(filestring,theme_list,stream_list,team_list,initiatives_list,releases_list)
 
 if __name__ == "__main__": main()
