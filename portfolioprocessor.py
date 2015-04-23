@@ -79,6 +79,7 @@ def get_item_list(
 #debug		print item_list[i]
 		item_string = item_string[item_end + len(item_xml_name):]
 		i = i + 1
+	print "Found", i, item_xml_name, "items..."
 	return item_list
 
 
@@ -130,7 +131,7 @@ def generate_csv(complete_data_list):
 	i=0
 	for lineitem in complete_data_list:
 		i=i+1
-		print i, lineitem
+#debug		print i, lineitem
 		if lineitem != []:
 			if lineitem[2] == []:
 				output_file.writerow([i,lineitem[1]])
@@ -138,6 +139,7 @@ def generate_csv(complete_data_list):
 				if subline:
 #debug					print subline[0], subline[1], subline[2]
 					output_file.writerow([i,lineitem[1],subline[0],subline[1],subline[2]])
+	print "Wrote", i, "lines to your output file"
 
 
 # main() methodically gets all our lists, consolidates them, and then output them to the csv file
