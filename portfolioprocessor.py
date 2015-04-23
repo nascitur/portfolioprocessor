@@ -12,6 +12,7 @@ import mmap
 import os
 import csv
 import datetime
+import decimal
 import xml.etree.ElementTree as ET
 
 # getthefile()
@@ -74,50 +75,45 @@ def get_item_list(
 		print item_list[i]
 		item_string = item_string[item_end + len(item_xml_name):]
 		i = i + 1
+	return item_list
 
 # Note: type = 0 means portfolio epic, type=1 means portfolio story, 
 # type = 2 means initiative
-def parsefileasxml(openfile,tagname):
+def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,release_list):
 	xml_file = ET.parse(openfile)
 	parsed_xml_file = xml_file.getroot()
 	top_level_list = []
 	top_level_list.append([])
 	priorityref = []
 	i = 0
-	for work_item in parsed_xml_file.iter(tagname):
+	for work_item in parsed_xml_file.iter('workItem'):
 		entry_type = work_item.attrib.get('type')
 		entry_id = work_item.attrib.get('id')
 		entry_parent = work_item.attrib.get('aoparent')
 		entry_subj = work_item.find('title').text
-		entry_stream = work_item.attrib.get('aostream')
-		entry_release = work_item.attrib.get('aorelease')
-		print entry_type, entry_id, entry_parent, entry_subj 
 		if entry_type and entry_id and entry_subj:
 			if entry_type == "0":
 				top_level_list[i] = [entry_id,entry_subj,[]]
 				top_level_list.append([])
 				priorityref.append(entry_id)
-#debug				print top_level_list[i], i, priorityref[i]  
 				i = i + 1
 			elif entry_type == "1":
-#debug				print priorityref.index(entry_parent) 		
+				entry_stream = work_item.attrib.get('aostream')
+				if entry_stream:
+					entry_stream = stream_list[int(entry_stream)-1]
+				entry_release = work_item.attrib.get('aorelease')
+				if entry_release:
+					entry_release = release_list[int(entry_release)-1]		
 				top_level_list[priorityref.index(entry_parent)][2].append(entry_subj)
-#				if entry_stream and entry_release:
 				top_level_list[priorityref.index(entry_parent)][2].append(entry_stream)
 				top_level_list[priorityref.index(entry_parent)][2].append(entry_release)
-				print top_level_list[priorityref.index(entry_parent)] 
+				print entry_type, entry_id, entry_parent, entry_stream, entry_release, entry_subj 
 				i = i + 1
 	return top_level_list
-	
+
 # Write out to CSV file
 
-def generate_csv(
-	subject_list,
-	theme_list,
-	stream_list,
-	team_list,
-	initiative_list,
-	release_list):
+def generate_csv(complete_data_list):
 	file_name = 'portfolio-'+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv'
 	path_name = os.path.expanduser('~/Desktop/') + 'output/'
 	print 'Output to ' + path_name + file_name
@@ -125,7 +121,7 @@ def generate_csv(
 	output_file = csv.writer(csvfile)
 	output_file.writerow(['Priority','Portfolio Epic','Team Epic','Stream','Release','Theme','Initiative'])
 	i=0
-	for lineitem in subject_list:
+	for lineitem in complete_data_list:
 		i=i+1
 		print i, lineitem
 		if lineitem != []:
@@ -147,8 +143,8 @@ def main():
 	team_list =  get_item_list(filestring,'team','<team ','<title>',16,'</title>',3)
 	initiative_list = get_item_list(filestring,'workItem','plan-initiatives-1','<title>',16,'</title>',3)
 	release_list = get_item_list(filestring,'release','<release ','<title>',16,'</title>',3)
-	complete_data_list = parsefileasxml(openfile,'workItem',)
-	generate_csv(subject_list,theme_list,stream_list,team_list,initiative_list,release_list)
+	complete_data_list = parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,release_list)
+	generate_csv(complete_data_list)
 
 if __name__ == "__main__": main()
 
