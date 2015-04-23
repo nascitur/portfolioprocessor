@@ -12,13 +12,12 @@ import mmap
 import os
 import csv
 import datetime
-import decimal
 import xml.etree.ElementTree as ET
+
 
 # getthefile()
 # takes a default filename as the input and requests user input
 # hardcoded to look on the mac desktop
-# returns an mmap string of the file
 
 def getthefile(default_filename):
 	print 'Inside user ~/Desktop/'
@@ -30,11 +29,15 @@ def getthefile(default_filename):
 	openfile = open(desktoppath + default_filename)
 	return openfile
 
+
+# returnfileasstring() returns an mmap string of the file for parsing
+
 def returnfileasstring(openfile):
 	stringified = mmap.mmap(openfile.fileno(), 0, access=mmap.ACCESS_READ)
 	return stringified
 
 
+# trim_to_section()
 # Pick out the section of the file to work on during each processing chunk
 # this prevents any term collisions during processing
 
@@ -43,7 +46,8 @@ def trim_to_section(item_string,item_xml_name):
 	item_endpos = item_string.find('</' + item_xml_name + 'Collection>')
 	return item_string[item_startpos:item_endpos]
 
-# get_item_list returns list of items from the xml
+
+# get_item_list() returns list of items from the xml
 # by "items" I mean initiatives, releases, teams, etc
 #
 # the item_string is the relevant file snippet with the item list
@@ -72,13 +76,17 @@ def get_item_list(
 		item_end = item_string.find(xml_after) - pad_after
 		item_list.append(i)
 		item_list[i] = item_string[item_start:item_end]
-		print item_list[i]
+#debug		print item_list[i]
 		item_string = item_string[item_end + len(item_xml_name):]
 		i = i + 1
 	return item_list
 
+
+# parsefileasxml() uses parser to pull out the epics and associated characteristic ids
+# then uses the lists we pulled earlier to turn the ids into words (release names etc)
 # Note: type = 0 means portfolio epic, type=1 means portfolio story, 
 # type = 2 means initiative
+
 def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,release_list):
 	xml_file = ET.parse(openfile)
 	parsed_xml_file = xml_file.getroot()
@@ -93,7 +101,7 @@ def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,rel
 		entry_subj = work_item.find('title').text
 		if entry_type and entry_id and entry_subj:
 			if entry_type == "0":
-				top_level_list[i] = [entry_id,entry_subj,[]]
+				top_level_list[i] = [entry_id,entry_subj,[[]]]
 				top_level_list.append([])
 				priorityref.append(entry_id)
 				i = i + 1
@@ -104,14 +112,13 @@ def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,rel
 				entry_release = work_item.attrib.get('aorelease')
 				if entry_release:
 					entry_release = release_list[int(entry_release)-1]		
-				top_level_list[priorityref.index(entry_parent)][2].append(entry_subj)
-				top_level_list[priorityref.index(entry_parent)][2].append(entry_stream)
-				top_level_list[priorityref.index(entry_parent)][2].append(entry_release)
-				print entry_type, entry_id, entry_parent, entry_stream, entry_release, entry_subj 
+				top_level_list[priorityref.index(entry_parent)][2].append([entry_subj,entry_stream,entry_release])
+#debug				print entry_type, entry_id, entry_parent, entry_stream, entry_release, entry_subj 
 				i = i + 1
 	return top_level_list
 
-# Write out to CSV file
+
+# generate_csv() writes out all of our parsing to CSV file in the output folder on desktop
 
 def generate_csv(complete_data_list):
 	file_name = 'portfolio-'+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv'
@@ -128,10 +135,12 @@ def generate_csv(complete_data_list):
 			if lineitem[2] == []:
 				output_file.writerow([i,lineitem[1]])
 			for subline in lineitem[2]:
-				print subline
-				output_file.writerow([i,lineitem[1],subline])
+				if subline:
+#debug					print subline[0], subline[1], subline[2]
+					output_file.writerow([i,lineitem[1],subline[0],subline[1],subline[2]])
 
-# Get all our lists, consolidate them, and output them to the csv file
+
+# main() methodically gets all our lists, consolidates them, and then output them to the csv file
 
 def main():
 	openfile = getthefile('export.xml')
@@ -147,6 +156,8 @@ def main():
 	generate_csv(complete_data_list)
 
 if __name__ == "__main__": main()
+
+
 
 # Note if you want to make this executable with just the file name:
 # make the file executable:
