@@ -79,7 +79,7 @@ def get_item_list(
 #debug		print item_list[i]
 		item_string = item_string[item_end + len(item_xml_name):]
 		i = i + 1
-	print "Found", i, item_xml_name, "items..."
+	print "Found", len(item_list), item_xml_name, "items..."
 	return item_list
 
 
@@ -103,7 +103,7 @@ def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,rel
 		if entry_type and entry_id and entry_subj:
 			if entry_type == "0":
 				top_level_list[i] = [entry_id,entry_subj,[[]]]
-				top_level_list.append([])
+				top_level_list.append([[]])
 				priorityref.append(entry_id)
 				i = i + 1
 			elif entry_type == "1":
@@ -116,6 +116,7 @@ def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,rel
 				top_level_list[priorityref.index(entry_parent)][2].append([entry_subj,entry_stream,entry_release])
 #debug				print entry_type, entry_id, entry_parent, entry_stream, entry_release, entry_subj 
 				i = i + 1
+	print "Found", len(top_level_list), "epic items..."
 	return top_level_list
 
 
@@ -124,30 +125,37 @@ def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,rel
 def generate_csv(complete_data_list):
 	file_name = 'portfolio-'+str(datetime.datetime.now().strftime("%Y%m%d%H%M"))+'.csv'
 	path_name = os.path.expanduser('~/Desktop/') + 'output/'
+	print ''
 	print 'Output to ' + path_name + file_name
+	print ''
 	csvfile = open(os.path.join(path_name,file_name),'a+')
 	output_file = csv.writer(csvfile)
 	output_file.writerow(['Priority','Portfolio Epic','Team Epic','Stream','Release','Theme','Initiative'])
 	i=0
+	lineswritten = 0
 	for lineitem in complete_data_list:
 		i=i+1
 #debug		print i, lineitem
-		if lineitem != []:
-			if lineitem[2] == []:
-				output_file.writerow([i,lineitem[1]])
+		try:
 			for subline in lineitem[2]:
-				if subline:
-#debug					print subline[0], subline[1], subline[2]
+				try: 
 					output_file.writerow([i,lineitem[1],subline[0],subline[1],subline[2]])
-	print "Wrote", i, "lines to your output file"
+					lineswritten = lineswritten+1
+				except IndexError:
+					output_file.writerow([i,lineitem[1]])
+					lineswritten = lineswritten+1
+		except IndexError:
+			output_file.writerow([i])
+			lineswritten = lineswritten+1
+	print "Wrote", i, "portfolio epics", "and", lineswritten, "lines to your output file"
 
 
 # main() methodically gets all our lists, consolidates them, and then output them to the csv file
 
 def main():
 	openfile = getthefile('export.xml')
-	print 'You should create a folder on the desktop named "output"'
-	print 'And give it permissions "chmod -R 755 output"'
+	print "Don't forget your output folder with proper permissions per readme.txt"
+	print ''
 	filestring = returnfileasstring(openfile)
 	theme_list = get_item_list(filestring,'theme','<theme ','<title>',16,'</title>',3)
 	stream_list = get_item_list(filestring,'stream','<stream ','<title>',16,'</title>',3)
