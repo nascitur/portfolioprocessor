@@ -21,12 +21,14 @@ import xml.etree.ElementTree as ET
 
 def getthefile(default_filename):
 	print 'Inside user ~/Desktop/'
-	desktoppath = os.path.expanduser('~/Desktop/')
+	homepath = os.path.expanduser('~')
 	user_filename = raw_input("Enter name of file (" + default_filename + "): ")
 	if user_filename != '':
-		default_filename = user_filename
-	print "opening " + desktoppath + default_filename + "..."
-	openfile = open(desktoppath + default_filename)
+		file_to_load = homepath + user_filename
+	else:
+		file_to_load = homepath + "/Desktop/" + default_filename
+	print "opening " + file_to_load + "..."
+	openfile = open(file_to_load)
 	return openfile
 
 
