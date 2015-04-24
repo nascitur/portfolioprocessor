@@ -20,13 +20,14 @@ import xml.etree.ElementTree as ET
 # hardcoded to look on the mac desktop
 
 def getthefile(default_filename):
-	print 'Inside user ~/Desktop/'
+	print 'Inside user home folder ~'
 	homepath = os.path.expanduser('~')
-	user_filename = raw_input("Enter name of file (" + default_filename + "): ")
+	user_filename = raw_input("Enter name of file or path (hit enter for Desktop/" + default_filename + "): ")
 	if user_filename != '':
 		file_to_load = homepath + user_filename
 	else:
 		file_to_load = homepath + "/Desktop/" + default_filename
+	print ''
 	print "opening " + file_to_load + "..."
 	openfile = open(file_to_load)
 	return openfile
@@ -81,7 +82,7 @@ def get_item_list(
 #debug		print item_list[i]
 		item_string = item_string[item_end + len(item_xml_name):]
 		i = i + 1
-	print "Found", len(item_list), item_xml_name, "items..."
+	print "Found", len(item_list), item_xml_name, "s..."
 	return item_list
 
 
@@ -118,7 +119,7 @@ def parsefileasxml(openfile,theme_list,stream_list,team_list,initiative_list,rel
 				top_level_list[priorityref.index(entry_parent)][2].append([entry_subj,entry_stream,entry_release])
 #debug				print entry_type, entry_id, entry_parent, entry_stream, entry_release, entry_subj 
 				i = i + 1
-	print "Found", len(top_level_list), "epic items..."
+	print "Found", len(top_level_list), "epics..."
 	return top_level_list
 
 
@@ -156,6 +157,7 @@ def generate_csv(complete_data_list):
 
 def main():
 	openfile = getthefile('export.xml')
+	print ''
 	print "Don't forget your output folder with proper permissions per readme.txt"
 	print ''
 	filestring = returnfileasstring(openfile)
