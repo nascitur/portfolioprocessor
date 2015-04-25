@@ -84,7 +84,7 @@ def get_item_list(
 #debug      print item_list[i]
         item_string = item_string[item_end + len(item_xml_name):]
         i = i + 1
-    print "Found", len(item_list), item_xml_name, "s..."
+    print "Found", len(item_list), item_xml_name + "s..."
     return item_list
 
 
@@ -96,8 +96,8 @@ def get_item_list(
 
 def parsefileasxml(openfile, theme_list, stream_list,
                    team_list, initiative_list, release_list):
-    xml_file = ET.parse(openfile)
-    parsed_xml_file = xml_file.getroot()
+  #  xml_file = ET.parse(openfile)
+    parsed_xml_file = ET.parse(openfile).getroot()
     top_level_list = []
     top_level_list.append([])
     priorityref = []
@@ -174,16 +174,17 @@ def main():
     stream_list = get_item_list(filestring, 'stream', '<stream ', '<title>', 16,
                                 '</title>', 3)
     team_list = get_item_list(filestring, 'team', '<team ', '<title>', 16,
-                               '</title>', 3)
+                              '</title>', 3)
     initiative_list = get_item_list(filestring, 'workItem',
                                     'plan-initiatives-1', '<title>', 16, '</title>', 3)
-    release_list = get_item_list(filestring, 'release', '<release ',' <title>',
+    release_list = get_item_list(filestring, 'release', '<release ', ' <title>',
                                  16, '</title>', 3)
     complete_data_list = parsefileasxml(openfile, theme_list, stream_list,
         team_list, initiative_list, release_list)
     generate_csv(complete_data_list)
 
-if __name__ == "__main__": main()
+if __name__ == "__main__": 
+    main()
 
 
 
