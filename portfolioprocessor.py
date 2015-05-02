@@ -93,6 +93,9 @@ def get_item_list(
 # words (release names etc).
 # Note: type = 0 means portfolio epic, type=1 means portfolio story,
 # type = 2 means initiative
+# The loop first uses the entry ids then replaces them with the real priority
+# So, final state for toplevellist structure: 
+# [priority, portfolio epic subj, [team epic subj, stream, release, theme]]
 
 def parsefileasxml(openfile, theme_list, stream_list,
                    team_list, initiative_list, release_list):
@@ -107,6 +110,9 @@ def parsefileasxml(openfile, theme_list, stream_list,
         entry_id = work_item.attrib.get('id')
         entry_parent = work_item.attrib.get('aoparent')
         entry_subj = work_item.find('title').text
+        entry_stream = ''
+        entry_release = ''
+        entry_theme = ''
         if entry_type and entry_id and entry_subj:
             if entry_type == "0":
                 top_level_list[i] = [entry_id, entry_subj, [[]]]
@@ -120,10 +126,13 @@ def parsefileasxml(openfile, theme_list, stream_list,
                 entry_release = work_item.attrib.get('aorelease')
                 if entry_release:
                     entry_release = release_list[int(entry_release) - 1]
+                entry_theme = work_item.attrib.get('aotheme')
+                if entry_theme:
+                    entry_theme = theme_list[int(entry_theme) - 1]
                 top_level_list[priorityref.index(entry_parent)][2].append(
-                    [entry_subj, entry_stream, entry_release])
-#debug  print entry_type, entry_id, entry_parent, entry_stream, entry_release, entry_subj
+                    [entry_subj, entry_stream, entry_release, entry_theme])
                 i = i + 1
+#            print entry_type, entry_id, entry_parent, entry_stream, entry_release, entry_subj
     print "Found", len(top_level_list), "epics..."
     return top_level_list
 
@@ -139,7 +148,7 @@ def generate_csv(complete_data_list):
     print ''
     csvfile = open(os.path.join(path_name, file_name), 'a+')
     output_file = csv.writer(csvfile)
-    output_file.writerow(['Priority', 'Portfolio Epic', 'Team Epic',
+    output_file.writerow(['Priority', 'Portfolio Epic', 'Team Epic', 
                           'Stream', 'Release', 'Theme', 'Initiative'])
     i = 0
     lineswritten = 0
@@ -150,7 +159,7 @@ def generate_csv(complete_data_list):
             for subline in lineitem[2]:
                 try:
                     output_file.writerow([i, lineitem[1], subline[0],
-                                         subline[1], subline[2]])
+                                         subline[1], subline[2], subline[3]])
                     lineswritten = lineswritten + 1
                 except IndexError:
                     output_file.writerow([i, lineitem[1]])
@@ -173,12 +182,14 @@ def main():
                                '</title>', 3)
     stream_list = get_item_list(filestring, 'stream', '<stream ', '<title>', 16,
                                 '</title>', 3)
+    print "streams:", stream_list
     team_list = get_item_list(filestring, 'team', '<team ', '<title>', 16,
                               '</title>', 3)
     initiative_list = get_item_list(filestring, 'workItem',
                                     'plan-initiatives-1', '<title>', 16, '</title>', 3)
-    release_list = get_item_list(filestring, 'release', '<release ', ' <title>',
+    release_list = get_item_list(filestring, 'release', '<release ', '<title>',
                                  16, '</title>', 3)
+    print "releases:", release_list
     complete_data_list = parsefileasxml(openfile, theme_list, stream_list,
         team_list, initiative_list, release_list)
     generate_csv(complete_data_list)
