@@ -24,7 +24,7 @@ def getthefile(default_filename):
     homepath = os.path.expanduser('~')
     user_filename = raw_input(
         "Enter name of file or path (hit enter for Desktop/" +
-            default_filename + "): ")
+        default_filename + "): ")
     if user_filename != '':
         file_to_load = homepath + user_filename
     else:
@@ -94,12 +94,16 @@ def get_item_list(
 # Note: type = 0 means portfolio epic, type=1 means portfolio story,
 # type = 2 means initiative
 # The loop first uses the entry ids then replaces them with the real priority
-# So, final state for toplevellist structure: 
+# So, final state for toplevellist structure:
 # [priority, portfolio epic subj, [team epic subj, stream, release, theme]]
 
-def parsefileasxml(openfile, theme_list, stream_list,
-                   team_list, initiative_list, release_list):
-  #  xml_file = ET.parse(openfile)
+def parsefileasxml(
+        openfile,
+        theme_list,
+        stream_list,
+        team_list,
+        initiative_list,
+        release_list):
     parsed_xml_file = ET.parse(openfile).getroot()
     top_level_list = []
     top_level_list.append([])
@@ -159,7 +163,7 @@ def generate_csv(complete_data_list):
             for subline in lineitem[2]:
                 try:
                     output_file.writerow([i, lineitem[1], subline[0],
-                                         subline[1], subline[2], subline[3]])
+                                          subline[1], subline[2], subline[3]])
                     lineswritten = lineswritten + 1
                 except IndexError:
                     output_file.writerow([i, lineitem[1]])
@@ -186,12 +190,13 @@ def main():
     team_list = get_item_list(filestring, 'team', '<team ', '<title>', 16,
                               '</title>', 3)
     initiative_list = get_item_list(filestring, 'workItem',
-                                    'plan-initiatives-1', '<title>', 16, '</title>', 3)
+                                    'plan-initiatives-1', '<title>', 16,
+                                    '</title>', 3)
     release_list = get_item_list(filestring, 'release', '<release ', '<title>',
                                  16, '</title>', 3)
     print "releases:", release_list
     complete_data_list = parsefileasxml(openfile, theme_list, stream_list,
-        team_list, initiative_list, release_list)
+                                        team_list, initiative_list, release_list)
     generate_csv(complete_data_list)
 
 if __name__ == "__main__": 
