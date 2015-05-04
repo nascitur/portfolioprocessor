@@ -152,7 +152,7 @@ def generate_csv(complete_data_list):
     print ''
     csvfile = open(os.path.join(path_name, file_name), 'a+')
     output_file = csv.writer(csvfile)
-    output_file.writerow(['Priority', 'Portfolio Epic', 'Team Epic', 
+    output_file.writerow(['Priority', 'Portfolio Epic', 'Team Epic',
                           'Stream', 'Release', 'Theme', 'Initiative'])
     i = 0
     lineswritten = 0
@@ -199,7 +199,7 @@ def main():
                                         team_list, initiative_list, release_list)
     generate_csv(complete_data_list)
 
-if __name__ == "__main__": 
+if __name__ == "__main__":
     main()
 
 
