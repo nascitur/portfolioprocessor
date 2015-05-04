@@ -89,11 +89,12 @@ def get_item_list(
 
 
 # parsefileasxml() uses parser to pull out the epics and associated
-# characteristic ids then uses the lists we pulled earlier to turn the ids into
-# words (release names etc).
+#   characteristic ids then uses the lists we pulled earlier to turn the ids
+#   into words (release names etc).
 # Note: type = 0 means portfolio epic, type=1 means portfolio story,
-# type = 2 means initiative
+#   type = 2 means initiative
 # The loop first uses the entry ids then replaces them with the real priority
+#   using priorityref as the conversion table
 # So, final state for toplevellist structure:
 # [priority, portfolio epic subj, [team epic subj, stream, release, theme]]
 
@@ -174,7 +175,8 @@ def generate_csv(complete_data_list):
     print "Wrote", i, "portfolio epics", "and", lineswritten, "lines to your output file"
 
 
-# main() methodically gets all our lists, consolidates them, and then output them to the csv file
+# main() methodically gets all our lists from the xml, consolidates them, and 
+#   then outputs them to the csv file
 
 def main():
     openfile = getthefile('export.xml')
