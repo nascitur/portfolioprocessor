@@ -10,7 +10,7 @@ Setup instructions for portfolioprocessor.py
 
 
 Advanced:
-- If you want to save to a folder or use a different name (for example Downloads/IronFistPlan.xml) then just put that full path into the prompt when it asks for the file name.
+- If you want to save to a folder or use a different name (for example Downloads/MyAwesomePlan.xml) then just put that full path into the prompt when it asks for the file name.
 - Note if you want to make this executable with just the file name:
 1) make the file executable:
 2) chmod +x portfolioprocessor.py
